@@ -4,7 +4,7 @@ import { ActivityIndicator, AppRegistry, StyleSheet, Text, TouchableOpacity, Vie
 import { RNCamera } from 'react-native-camera';
 import axios from "axios"
 import { BACKEND, PORT } from 'react-native-dotenv'
-
+import RNFS, { TemporaryDirectoryPath }  from 'react-native-fs';
 const API = `${BACKEND}:${PORT}`
 
 const PendingView = () => (
@@ -33,41 +33,52 @@ class Recorder extends PureComponent {
     this.handleReady = this.handleReady.bind(this)
   }
 
-  componentDidMount() {
-    console.log("mounted", API)
-    axios.get(`${API}`)
-      .then(data => {
-        console.log("data", data)
-      })
-      .catch(err => {
-        console.log("err", err)
-      })
-  }
-
   async startRecording() {
     this.setState({ recording: true });
     // default to mp4 for android as codec is not set
+    
+    const options = { path: TemporaryDirectoryPath + "/kdfjgkdjgf" + "video.mp4" }
     const { uri, codec = "mp4" } = await this.camera.recordAsync();
     this.setState({ recording: false, processing: true });
     const type = `video/${codec}`;
-  
-    const data = new FormData();
-    data.append("video", {
-      name: "mobile-video-upload",
-      type,
-      uri
+    console.log(uri)
+
+    RNFS.copyFile(uri, "file:///data/user/0/com.cameramodule/files/" + "/gfhg.mp4").then(() => {
+      console.log("Video copied locally!!");
+    }, (error) => {
+        console.log("CopyFile fail for video: " + error);
     });
+
+    const data = new FormData();
   
-    try {
-      await fetch(API, {
-        method: "post",
-        body: data
-      });
-    } catch (e) {
-      console.error(e);
+    data.append("video", {
+      filename: "video",
+      type: "video/mp4",
+      uri: uri
+    });    
+    for (var key of data.entries()) {
+      console.log(key[0] + ', ' + key[1]);
     }
+    const request = {
+        method: "post",
+        body: data,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'multipart/form-data'
+        }
+    }
+    console.log("request", request)
+
+    fetch(API + '/upload', request)
+      .then(data => {
+        console.log("data", data)
+        this.setState({ processing: false });
+      })
+      .catch(err => {
+        console.log(err)
+        this.setState({ processing: false });
+      })
   
-    this.setState({ processing: false });
   }
 
   stopRecording() {
@@ -122,11 +133,12 @@ class Recorder extends PureComponent {
             style={styles.preview}
             type={RNCamera.Constants.Type.back}
             flashMode={RNCamera.Constants.FlashMode.on}
+            onCameraReady={this.handleReady}
           />
           <View
             style={{ flex: 0, flexDirection: "row", justifyContent: "center" }}
           >
-            {button}
+            {this.state.cameraReady && button}
           </View>
         </View>
       );
@@ -158,3 +170,7 @@ const styles = StyleSheet.create({
 
 
 export default Recorder
+
+
+// req.form ImmutableMultiDict([('video', 'file:///data/user/0/com.cameramodule/cache/Camera/810f0053-b3ca-4ab8-9722-4551a779f50f.mp4')])req.files ImmutableMultiDict([('video', <FileStorage: '30 Second Timer - YouTube.mkv' ('video/x-matroska')>)])        
+// req.form ImmutableMultiDict([])

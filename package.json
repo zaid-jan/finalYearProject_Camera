@@ -14,7 +14,9 @@
     "react": "16.11.0",
     "react-native": "0.62.2",
     "react-native-camera": "^3.23.1",
-    "react-native-dotenv": "^0.2.0"
+    "react-native-dotenv": "^0.2.0",
+    "react-native-fs": "^2.16.6",
+    "react-native-uuid": "^1.4.9"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",

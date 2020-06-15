@@ -16,15 +16,18 @@ import {
   StatusBar,
 } from 'react-native';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+// import {
+//   Header,
+//   LearnMoreLinks,
+//   Colors,
+//   DebugInstructions,
+//   ReloadInstructions,
+// } from 'react-native/Libraries/NewAppScreen';
 
 import Recorder from "./view/Recorder"
+
+GLOBAL.XMLHttpRequest = GLOBAL.originalXMLHttpRequest || GLOBAL.XMLHttpRequest;
+GLOBAL.FormData = GLOBAL.originalFormData || GLOBAL.FormData
 
 const App: () => React$Node = () => {
   return (
